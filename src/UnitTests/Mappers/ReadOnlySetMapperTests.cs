@@ -38,16 +38,16 @@ public class When_mapping_interface_to_interface_readonly_set : AutoMapperSpecBa
     }
 }
 
-public class When_mapping_interface_to_concrete_readonly_set : AutoMapperSpecBase
+public class When_mapping_hashset_to_interface_readonly_set : AutoMapperSpecBase
 {
     public class Source
     {
-        public IReadOnlySet<int> Values { get; set; }
+        public HashSet<int> Values { get; set; }
     }
 
     public class Destination
     {
-        public HashSet<int> Values { get; set; }
+        public IReadOnlySet<int> Values { get; set; }
     }
 
     protected override MapperConfiguration CreateConfiguration() => new(config =>
