@@ -23,6 +23,10 @@ public class CollectionMapper : IObjectMapper
         {
             return MapReadOnlyCollection(typeof(Dictionary<,>), typeof(ReadOnlyDictionary<,>));
         }
+        if (destinationType.IsGenericType(typeof(IReadOnlySet<>)))
+        {
+            return MapReadOnlyCollection(typeof(HashSet<>), typeof(HashSet<>));
+        }
         if (destinationType == sourceExpression.Type && destinationType.Name == nameof(NameValueCollection))
         {
             return CreateNameValueCollection(sourceExpression);
@@ -34,7 +38,12 @@ public class CollectionMapper : IObjectMapper
             var closedCollectionType = genericCollectionType.MakeGenericType(destinationTypeArguments);
             var dict = MapCollectionCore(configuration.Default(closedCollectionType));
             var readOnlyClosedType = destinationType.IsInterface ? genericReadOnlyCollectionType.MakeGenericType(destinationTypeArguments) : destinationType;
-            return New(readOnlyClosedType.GetConstructors()[0], dict);
+            return New(readOnlyClosedType.GetConstructors().First(ctor => ParametersMatch(ctor.GetParameters())), dict);
+
+            bool ParametersMatch(ParameterInfo[] parameters)
+            {
+                return parameters.Length == 1 && parameters[0].ParameterType.IsAssignableFrom(closedCollectionType);
+            }
         }
         Expression MapCollectionCore(Expression destExpression)
         {
